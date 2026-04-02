@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { NextRequest, NextResponse } from "next/server";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
-const TEAM_MEMBER_USERNAME = process.env.TEAM_MEMBER_USERNAME!; // add this to your .env
+const TEAM_MEMBER_USERNAME = process.env.NEXT_PUBLIC_TEAM_MEMBER_USERNAME!; // add this to your .env
 
 async function sendMessage(
   chatId: number,
@@ -91,7 +91,7 @@ Here is a summary of what you submitted:
 💰 <b>Budget:</b> ${lead.budget || "—"}
 🛠 <b>Services Selected:</b> ${services}
 
-Tap the button below to open your private chat with our advisor.
+Tap the button below to open your private chat with our team member.
 Your details will be pre-filled — just tap <b>Send</b>!
   `.trim();
 
@@ -99,7 +99,7 @@ Your details will be pre-filled — just tap <b>Send</b>!
     inline_keyboard: [
       [
         {
-          text: "💬 Open chat with advisor",
+          text: "💬 Open chat with our team member",
           url: handoffUrl,
         },
       ],
