@@ -21,10 +21,17 @@ export default function SignInPage() {
 
   function validate(email: string, password: string): boolean {
     const next: FormErrors = {};
-    if (!email.trim()) next.email = "Enter your email address";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+
+    if (!email.trim()) {
+      next.email = "Enter your email address";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       next.email = "Enter a valid email address";
-    if (!password) next.password = "Enter your password";
+    }
+
+    if (!password) {
+      next.password = "Enter your password";
+    }
+
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -34,27 +41,40 @@ export default function SignInPage() {
     setServerError("");
 
     const form = e.currentTarget;
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
-    const password = (form.elements.namedItem("password") as HTMLInputElement)
+    const rawEmail = (form.elements.namedItem("email") as HTMLInputElement)
       .value;
+    const rawPassword = (
+      form.elements.namedItem("password") as HTMLInputElement
+    ).value;
 
-    if (!validate(email, password)) return;
+    if (!validate(rawEmail, rawPassword)) return;
+
+    const email = rawEmail.trim().toLowerCase();
+    const password = rawPassword;
 
     setLoading(true);
-    const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
 
-    if (error) {
-      setServerError("Email or password is incorrect");
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("signInWithPassword error:", error);
+        setServerError(error.message || "Email or password is incorrect");
+        return;
+      }
+
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("Unexpected sign-in error:", err);
+      setServerError("Something went wrong while signing in");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push("/dashboard");
   }
 
   return (
@@ -67,7 +87,6 @@ export default function SignInPage() {
         gap: "2rem",
       }}
     >
-      {/* Header */}
       <div>
         <Link
           href="/welcome"
@@ -82,6 +101,7 @@ export default function SignInPage() {
         >
           ← Back
         </Link>
+
         <h1
           style={{
             fontSize: "1.5rem",
@@ -92,12 +112,12 @@ export default function SignInPage() {
         >
           Welcome back
         </h1>
+
         <p style={{ color: "var(--color-text-muted)", marginTop: "0.375rem" }}>
           Sign in to manage your deals.
         </p>
       </div>
 
-      {/* Form */}
       <form
         onSubmit={handleSubmit}
         noValidate
@@ -131,7 +151,6 @@ export default function SignInPage() {
         </Button>
       </form>
 
-      {/* Switch to sign up */}
       <p
         style={{
           textAlign: "center",
