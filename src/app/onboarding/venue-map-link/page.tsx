@@ -3,9 +3,15 @@
 import Button from "@/components/ui/Button";
 import FormError from "@/components/ui/FormError";
 import Input from "@/components/ui/Input";
-import { isValidGoogleMapsUrl, saveVenue } from "@/lib/venue";
+import Select from "@/components/ui/Select";
+import {
+  getZoneIdFromAddress,
+  isValidGoogleMapsUrl,
+  saveVenue,
+  ZONE_OPTIONS,
+} from "@/lib/venue";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 function VenueMapLinkForm() {
   const router = useRouter();
@@ -15,16 +21,23 @@ function VenueMapLinkForm() {
   const [urlError, setUrlError] = useState("");
   const [mapsUrl, setMapsUrl] = useState("");
 
-  // Read draft directly from URL params — no sessionStorage, no effects
   const venueName = params.get("venue_name") || "";
   const venueType = params.get("venue_type") || "";
   const addressLine = params.get("address_line") || "";
 
-  // If params are missing, send back to step 1
+  const suggestedZoneId = useMemo(
+    () => getZoneIdFromAddress(addressLine) ?? "",
+    [addressLine],
+  );
+
+  const [zoneId, setZoneId] = useState("");
+
   if (!venueName || !venueType || !addressLine) {
     router.replace("/onboarding/venue-basics");
     return null;
   }
+
+  const effectiveZoneId = zoneId || suggestedZoneId;
 
   function validate(): boolean {
     if (!mapsUrl.trim()) {
@@ -51,6 +64,7 @@ function VenueMapLinkForm() {
       venue_type: venueType as "cafe" | "bakery" | "restaurant",
       address_line: addressLine,
       google_maps_url: mapsUrl.trim(),
+      zone_id: effectiveZoneId || null,
     });
 
     if (error) {
@@ -73,7 +87,6 @@ function VenueMapLinkForm() {
         gap: "2rem",
       }}
     >
-      {/* Step indicator */}
       <div>
         <div
           style={{ display: "flex", gap: "0.375rem", marginBottom: "1.5rem" }}
@@ -132,7 +145,6 @@ function VenueMapLinkForm() {
         </p>
       </div>
 
-      {/* Venue summary */}
       <div
         style={{
           padding: "1rem",
@@ -153,7 +165,6 @@ function VenueMapLinkForm() {
         </p>
       </div>
 
-      {/* Form */}
       <form
         onSubmit={handleSubmit}
         noValidate
@@ -179,6 +190,21 @@ function VenueMapLinkForm() {
           hint="Open Google Maps → your business → Share → Copy link"
         />
 
+        <Select
+          label="Tourist area"
+          name="zone_id"
+          value={effectiveZoneId}
+          onChange={(e) => setZoneId(e.target.value)}
+          options={[
+            {
+              value: "",
+              label: suggestedZoneId ? "Use suggested area" : "Select an area",
+            },
+            ...ZONE_OPTIONS,
+          ]}
+          hint="Choose the Kyoto area tourists would associate with your venue."
+        />
+
         <div style={{ marginTop: "auto", paddingTop: "1rem" }}>
           <Button type="submit" fullWidth loading={loading}>
             Save venue
@@ -189,7 +215,6 @@ function VenueMapLinkForm() {
   );
 }
 
-// useSearchParams() requires a Suspense boundary in Next.js App Router
 export default function VenueMapLinkPage() {
   return (
     <Suspense
