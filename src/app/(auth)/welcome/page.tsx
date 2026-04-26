@@ -1,6 +1,6 @@
 import Button from "@/components/ui/Button";
 import Link from "next/link";
-// dd
+
 export default function WelcomePage() {
   return (
     <main
