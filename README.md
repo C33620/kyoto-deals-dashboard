@@ -1,4 +1,4 @@
-# 🏪 Kyoto Tourism Business Activation Dashboard
+# 🏪 Kyoto Tourism Business Dashboard
 
 > A location-based dashboard concept enabling local businesses in Kyoto to promote targeted offers to tourists in order to balance tourism flow and increase visibility for under-visited areas.
 
@@ -125,7 +125,7 @@ If implemented, this system could:
 
 ---
 
-## 🔗 Relationship to Kyoto Map Project
+## 🔗 Relationship to Kyoto Live Congestion Map
 
 This dashboard is a **companion system** to the Kyoto Smart Tourism Map:
 
